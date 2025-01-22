@@ -1,0 +1,7 @@
+.env.*
+.env
+*/.env
+/bin
+backend/bin/
+backend/.env.*
+/backend/.env
