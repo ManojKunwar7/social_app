@@ -20,6 +20,11 @@ func main() {
 		log.Panicf("Unable to connect mongodb on %v\n", mongodb_url)
 		return
 	}
+	defer func() {
+		if err = mongodb_client.Disconnect(context.TODO()); err != nil {
+			log.Panic(err)
+		}
+	}()
 	if err = mongodb_client.Ping(context.TODO(), readpref.Primary()); err != nil {
 		log.Panicf("Unable to connect mongodb on %v\n", mongodb_url)
 		log.Panic(err)

@@ -41,7 +41,15 @@ func (h *Handler) LoginController(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := h.auth_module.LoginModule(payload)
 	fmt.Println("Your Resp :-", resp)
-	helper.WriteJson(w, http.StatusOK, map[string]any{"status": true, "data": []any{payload}})
+	if resp.Status {
+		http.SetCookie(w, &http.Cookie{
+			Name:  "r_id",
+			Value: payload.Email,
+		})
+		helper.WriteJson(w, http.StatusOK, resp)
+		return
+	}
+	helper.WriteJson(w, http.StatusOK, resp)
 }
 
 func (h *Handler) RegisterController(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +66,26 @@ func (h *Handler) RegisterController(w http.ResponseWriter, r *http.Request) {
 		helper.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", error))
 		return
 	}
+
+	if payload.Password != payload.ConfirmPassword {
+		helper.WriteError(w, http.StatusBadRequest, fmt.Errorf("password and confirm password are not same"))
+		return
+	}
+
+	user, err := h.auth_module.FindUserByEmail(payload.Email)
+	fmt.Printf("%q\n", user)
+	if err != nil || len(user) > 0 {
+		helper.WriteError(w, http.StatusBadRequest, fmt.Errorf("Account with this email already exists!"))
+		return
+	}
+	hashedPassword, err := helper.ConvertPaswordToHashPassword(payload.Password)
+	if err != nil {
+		helper.WriteError(w, http.StatusBadRequest, fmt.Errorf("password and confirm password are not same"))
+		return
+	}
+	payload.Password = hashedPassword
+	fmt.Printf("Hashed password %q\n", hashedPassword)
 	resp := h.auth_module.RegisterModule(payload)
 	fmt.Println("Your resp ", resp)
-	helper.WriteJson(w, http.StatusOK, map[string]any{"status": true, "data": []any{payload}})
+	helper.WriteJson(w, http.StatusOK, resp)
 }

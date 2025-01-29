@@ -5,11 +5,11 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type User struct {
 	ID         primitive.ObjectID `json:"_id" bson:"_id"`
 	Email      string             `json:"email"`
-	PhoneNo    string             `json:"phone_no"`
-	UserName   string             `json:"username"`
-	LastName   string             `json:"last_name"`
+	Phone_No   string             `json:"phone_no"`
+	User_Name  string             `json:"user_name"`
+	Last_Name  string             `json:"last_name"`
 	Password   string             `json:"password"`
-	FirstName  string             `json:"first_name"`
+	First_Name string             `json:"first_name"`
 	Created_at primitive.DateTime `json:"created_at" bson:"created_at"`
 	Updated_at primitive.DateTime `json:"updated_at" bson:"updated_at"`
 }
@@ -38,4 +38,5 @@ type Func_resp struct {
 type AuthModuleInterface interface {
 	LoginModule(UserLoginPayload) Func_resp
 	RegisterModule(UserRegisterPayload) Func_resp
+	FindUserByEmail(email string) ([]User, error)
 }
