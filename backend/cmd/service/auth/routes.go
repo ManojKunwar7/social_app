@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/ManojKunwar7/social_app/backend/helper"
 	"github.com/ManojKunwar7/social_app/backend/types"
@@ -26,7 +27,7 @@ func NewHandler(auth_module types.AuthModuleInterface, redis_client *redis.Clien
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/login", h.LoginController).Methods(http.MethodPost)
 	router.HandleFunc("/register", h.RegisterController).Methods(http.MethodPost)
-	router.HandleFunc("/check/token", h.CheckTokenController).Methods(http.MethodPost)
+	router.HandleFunc("/check/token", h.CheckTokenController).Methods(http.MethodGet)
 }
 
 func (h *Handler) LoginController(w http.ResponseWriter, r *http.Request) {
@@ -53,9 +54,12 @@ func (h *Handler) LoginController(w http.ResponseWriter, r *http.Request) {
 			helper.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", err.Error()))
 			return
 		}
+		fmt.Println("HERR :-", user_profile)
 		http.SetCookie(w, &http.Cookie{
-			Name:  "sessionId",
-			Value: sessionId,
+			Name:   "sessionId",
+			Value:  sessionId,
+			MaxAge: 24 * 3600,
+			Path:   "/",
 		})
 		helper.WriteJson(w, http.StatusOK, resp)
 		return
@@ -103,11 +107,14 @@ func (h *Handler) RegisterController(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) CheckTokenController(w http.ResponseWriter, r *http.Request) {
 	var payload types.TokenPayload
-	if err := helper.ParseJson(r, &payload); err != nil {
-		helper.WriteJson(w, http.StatusBadRequest, map[string]any{
-			"status": false, "authenticated": false, "data": []any{}, "c_msg": err.Error(), "alert_status": "error",
-		})
-		return
+	cookies := r.Header.Get("Cookie")
+	for _, c := range strings.Split(cookies, ";") {
+		cookie := strings.Split(c, "=")
+		if strings.Trim(cookie[0], " ") == "sessionId" {
+			// Found! Use it!
+			fmt.Println("value", cookie[1]) // The cookie's value
+			payload.SessionID = strings.Trim(cookie[1], " ")
+		}
 	}
 	resp, err := h.auth_module.CheckToken(payload.SessionID)
 	if err != nil {

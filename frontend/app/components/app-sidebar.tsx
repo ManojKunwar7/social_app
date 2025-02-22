@@ -1,5 +1,5 @@
-import { MessageCircle, User2 } from "lucide-react"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "./ui/sidebar";
+import { LogOut, MessageCircle, User2 } from "lucide-react"
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "./ui/sidebar";
 import { useNavigate } from "@remix-run/react";
 
 const items = [
@@ -28,6 +28,16 @@ export function AppSidebar() {
   const onHandleLickClick = (url: string) => {
     navigate(url);
   }
+
+  const HandleLogout = ()=>{
+    try {
+      document.cookie = "sessionId" +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      // TODO Handle on the server :0
+      window.location.href = "/login"
+    } catch (error) {
+      console.log("HandleLogout err",error)
+    }
+  }
   return (
     <Sidebar>
       <SidebarContent>
@@ -51,6 +61,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter >
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <button onClick={HandleLogout} >
+                <LogOut />
+                <span>Logout</span>
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

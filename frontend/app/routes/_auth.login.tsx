@@ -5,6 +5,8 @@ import { Label } from "~/components/ui/label"
 import { Link } from "@remix-run/react"
 import { SyntheticEvent } from "react"
 import axios from "axios"
+import { toast } from "sonner"
+import { Ban, Check } from "lucide-react"
 
 interface loginpayload {
   email: string | undefined,
@@ -13,6 +15,7 @@ interface loginpayload {
 
 
 export default function Login() {
+
   const onSubmitHandler = async (e: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     try {
       e.preventDefault()
@@ -29,6 +32,22 @@ export default function Login() {
       }
       const loginResp = await axios(axios_payload)
       console.log("loginResp", loginResp);
+      if (!loginResp.data?.Status) {
+        toast.error(loginResp.data?.C_msg, {
+          position: "top-right",
+          icon: <Ban />,
+          richColors: true
+        })
+        return
+      }
+      toast.success(loginResp.data?.C_msg, {
+        position: "top-right",
+        icon: <Check />,
+        richColors: true
+      })
+      setTimeout(()=>{
+      window.location.href = '/chat'
+      },1000)
     } catch (error) {
       console.log("Register Error", error);
     }

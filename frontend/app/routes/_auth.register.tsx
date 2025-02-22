@@ -5,6 +5,8 @@ import { Input } from "~/components/ui/input"
 import { Link } from "@remix-run/react"
 import { SyntheticEvent } from "react"
 import axios from "axios"
+import { toast } from "sonner"
+import { Ban, Check } from "lucide-react"
 
 interface RegisterPayload {
   first_name: string | undefined,
@@ -36,6 +38,19 @@ export default function Register() {
       }
       const registerResp = await axios(axios_payload)
       console.log("registerResp", registerResp.data);
+      if (!registerResp.data?.Status) {
+        toast.error(registerResp.data?.C_msg, {
+          position: "top-right",
+          icon: <Ban />,
+          richColors: true
+        })
+        return
+      }
+      toast.success(registerResp.data?.C_msg, {
+        position: "top-right",
+        icon: <Check />,
+        richColors: true
+      })
     } catch (error) {
       console.log("Register Error", error);
     }

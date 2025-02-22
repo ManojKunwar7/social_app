@@ -28,10 +28,12 @@ func ConvertPaswordToHashPassword(password string) (string, error) {
 
 func CreateAuthSession(redisClient redis.Client, user types.UserProfile) (string, error) {
 	sessionId := uuid.NewV4().String()
-	_, err := redisClient.JSONSet(context.TODO(), sessionId, "$", user).Result()
+	_, err := redisClient.JSONSet(context.Background(), sessionId, "$", user).Result()
 	if err != nil {
 		fmt.Println("createauthsession-->", err.Error())
 		return "", err
 	}
+	resp, err := redisClient.Expire(context.Background(), sessionId, 3600000000000*24).Result()
+	fmt.Println("redis expiry ", resp, err)
 	return sessionId, nil
 }

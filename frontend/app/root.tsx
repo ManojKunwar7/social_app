@@ -2,6 +2,7 @@ import {
   Links,
   Meta,
   Outlet,
+  redirect,
   Scripts,
   ScrollRestoration,
   useLoaderData,
@@ -13,6 +14,7 @@ import { themeSessionResolver } from "./sessions.server";
 import clsx from "clsx";
 import "./tailwind.css"
 import GlobalLoading from "./components/global-loading";
+import { Toaster } from "./components/ui/sonner";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -29,8 +31,32 @@ export const links: LinksFunction = () => [
 
 
 export async function loader({ request }: LoaderFunctionArgs) {
+try {
+    const fetch_resp = await fetch(`${process.env.backend_url}/api/v1/check/token`, {
+      method: "GET",
+      headers: {
+        "Cookie": request.headers.get("Cookie") ?? ""
+      }
+    })
+
+    const token_resp = await fetch_resp.json()
+    const url = new URL(request?.url)
+    console.log("fetch_resp", fetch_resp, url);
+    if (token_resp?.authenticated) {
+      console.log("token_resp", token_resp?.authenticated);
+      if ((["/login", "/register"].includes(url.pathname))) {
+        return redirect('/chat')
+      }
+    } else {
+      if (!(["/login", "/register"].includes(url.pathname))) {
+        return redirect('/login')
+      }
+    }
+    return Response.json({})
+  } catch (error) {
+    console.log("Error on loading", error)
+  }
   const { getTheme } = await themeSessionResolver(request)
-  // console.log("getTheme", getTheme);
   return {
     theme: getTheme(),
   }
@@ -64,6 +90,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
 //   return <Outlet />;
 // }
 
+// export async function loader({ request }: LoaderFunctionArgs) {
+//   const cookies = request.headers.get("Cookie");
+//   console.log('cookies', cookies);
+
+//   // const checkAuth = await fetch() 
+//   return Response.json({
+
+//   })
+// }
+
+
 export function App() {
   const data = useLoaderData<typeof loader>()
   const [theme] = useTheme()
@@ -80,6 +117,7 @@ export function App() {
       <body className="absolute min-w-full flex flex-col h-full">
         <GlobalLoading />
         <Outlet />
+        <Toaster closeButton={true} />
         <ScrollRestoration />
         <Scripts />
       </body>
