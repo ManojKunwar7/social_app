@@ -53,6 +53,10 @@ export default function Register() {
       })
     } catch (error) {
       console.log("Register Error", error);
+      toast.error("Internal server error!", {
+        position: "top-right",
+        richColors: true
+      })
     }
   }
   return (

@@ -6,7 +6,7 @@ import { Link } from "@remix-run/react"
 import { SyntheticEvent } from "react"
 import axios from "axios"
 import { toast } from "sonner"
-import { Ban, Check } from "lucide-react"
+import { Check } from "lucide-react"
 
 interface loginpayload {
   email: string | undefined,
@@ -35,7 +35,6 @@ export default function Login() {
       if (!loginResp.data?.Status) {
         toast.error(loginResp.data?.C_msg, {
           position: "top-right",
-          icon: <Ban />,
           richColors: true
         })
         return
@@ -50,6 +49,10 @@ export default function Login() {
       },1000)
     } catch (error) {
       console.log("Register Error", error);
+      toast.error("Internal server error!", {
+        position: "top-right",
+        richColors: true
+      })
     }
   }
   return (

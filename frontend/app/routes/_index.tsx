@@ -36,6 +36,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   } catch (error) {
     console.log("Error on loading", error)
   }
+  return redirect('/login')
 }
 
 

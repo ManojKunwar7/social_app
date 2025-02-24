@@ -31,7 +31,8 @@ export const links: LinksFunction = () => [
 
 
 export async function loader({ request }: LoaderFunctionArgs) {
-try {
+  const { getTheme } = await themeSessionResolver(request)
+  try {
     const fetch_resp = await fetch(`${process.env.backend_url}/api/v1/check/token`, {
       method: "GET",
       headers: {
@@ -52,13 +53,14 @@ try {
         return redirect('/login')
       }
     }
-    return Response.json({})
+    return {
+      theme: getTheme(),
+    }
   } catch (error) {
     console.log("Error on loading", error)
-  }
-  const { getTheme } = await themeSessionResolver(request)
-  return {
-    theme: getTheme(),
+    return {
+      theme: getTheme(), 
+    }
   }
 }
 
