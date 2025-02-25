@@ -47,6 +47,10 @@ const ChatArea = ({ userObj, chatUser, setChatUserObj }: { userObj: SearchResult
   // const [caption, setCaption] = useState<string>("")
   const [showSendMedia, setShowSendMedia] = useState<boolean>(false)
 
+  useEffect(() => {
+    if (showSendMedia) setShowSendMedia(false);
+    if (sendMediaFile?.length) setSendMediaFile([]);
+  }, [sendMediaFile?.length, showSendMedia])
 
   useEffect(() => {
     if (showSendMedia) setShowSendMedia(false);
@@ -77,10 +81,11 @@ const ChatArea = ({ userObj, chatUser, setChatUserObj }: { userObj: SearchResult
         })
         return
       }
+      const receiver_id = chatUser?.sender_id == userObj?._id ? chatUser?.receiver_id : chatUser?.sender_id;
       const send_chat_resp = await axios({
         url: `/backend/api/private/v1/send/chat/text`,
         method: "POST",
-        data: { conversation_id: chatUser?._id, text: textMsg, user_id: userObj?._id },
+        data: { conversation_id: chatUser?._id, msg: textMsg, user_id: userObj?._id, sender_id: userObj?._id, receiver_id },
         headers: { 'Content-Type': "application/json" }
       })
       console.log("send_chat_resp", send_chat_resp);

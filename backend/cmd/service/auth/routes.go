@@ -48,22 +48,22 @@ func (h *Handler) LoginController(w http.ResponseWriter, r *http.Request) {
 	resp := h.auth_module.LoginModule(payload, &user_profile)
 	fmt.Println("Your Resp :-", resp)
 	fmt.Println("user_profile :-", user_profile)
-	if resp.Status {
-		sessionId, err := helper.CreateAuthSession(*h.redis_client, user_profile)
-		if err != nil {
-			helper.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", err.Error()))
-			return
-		}
-		fmt.Println("HERR :-", user_profile)
-		http.SetCookie(w, &http.Cookie{
-			Name:   "sessionId",
-			Value:  sessionId,
-			MaxAge: 24 * 3600,
-			Path:   "/",
-		})
+	if !resp.Status {
 		helper.WriteJson(w, http.StatusOK, resp)
 		return
 	}
+	sessionId, err := helper.CreateAuthSession(*h.redis_client, user_profile)
+	if err != nil {
+		helper.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", err.Error()))
+		return
+	}
+	fmt.Println("HERR :-", user_profile)
+	http.SetCookie(w, &http.Cookie{
+		Name:   "sessionId",
+		Value:  sessionId,
+		MaxAge: 24 * 3600,
+		Path:   "/",
+	})
 	helper.WriteJson(w, http.StatusOK, resp)
 }
 
